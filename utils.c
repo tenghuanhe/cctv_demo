@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <curl/curl.h>
 #include <pillowtalk.h>
 
@@ -12,24 +14,24 @@ struct memory_chunk
 };
 
 pt_node_t* pt_gps(double lon, double lat);
-void http_post_data(char* data, int data_len, const char* server_target);
 static void* myrealloc(void* ptr, size_t size);
 static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* data);
+void http_post_data(char* data, int data_len, char* server_target);
+void upload_local_to_bulks(char* file, char* server_target);
+void upload_a_single_doc(pt_node_t* doc, char* server_target);
+void save_gps_to_local(pt_node_t* gps, FILE* fp);
+
 double getLon();
 double getLat();
 char* getTime();
 
 int main(int argc, char** argv)
 {
-    const char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv";
+    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1/";
     pt_node_t* gps = pt_gps(getLon(), getLat());
-    char* data = NULL;
-    int data_len = 0;
 
-    data = pt_to_json(gps, 0);
-    data_len = strlen(data);
-
-    http_post_data(data, data_len, server_target);
+    upload_a_single_doc(gps, server_target);
+    upload_local_to_bulks("pp.json", server_target);
     return 0; 
 }
 
@@ -66,14 +68,14 @@ double getLat()
 
 char* getTime()
 {
-    char* string = malloc(sizeof(char) * 20);
+    char* string = malloc(100);
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    sprintf(string, "%d-%d-%d %d:%d:%d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    snprintf(string, 100, "%d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     return (char*)string;
 }
 
-void http_post_data(char* data, int data_len, const char* server_target)
+void http_post_data(char* data, int data_len, char* server_target)
 {
     struct curl_slist* header_list = NULL;
     struct memory_chunk chunk;
@@ -91,6 +93,7 @@ void http_post_data(char* data, int data_len, const char* server_target)
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&chunk);
 
     res = curl_easy_perform(curl_handle);
+    printf("%s\n", chunk.memory);
     curl_easy_cleanup(curl_handle);
 }
 
@@ -115,4 +118,55 @@ static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* d
         mem->memory[mem->size] = 0;
     }
     return realsize;
+}
+
+void upload_local_to_bulks(char* file, char* server_target)
+{
+    FILE* fp = NULL;
+    struct stat st;
+
+    const char* bulk_head = "{\"docs\": [";
+    const char* bulk_tail = "]}";
+    const char* bulk_docs = "/_bulk_docs";
+    char server_bulk_target[100];
+    char* file_data;
+    char* data;
+    int data_len;
+    fp = fopen(file, "r");
+
+    if(fp == NULL)
+        return;
+    
+    fstat(fileno(fp), &st);
+
+    // Here subtraction by 2 to remove the tailling comma in file
+    file_data = malloc(sizeof(char) * st.st_size - 2);
+    fread(file_data, sizeof(char), st.st_size - 2, fp);
+
+    data_len = st.st_size - 2 + strlen(bulk_head) + strlen(bulk_tail) + 1;
+    data = malloc(data_len);
+    snprintf(data, data_len, "%s%s%s", bulk_head, file_data, bulk_tail);
+    snprintf(server_bulk_target, 100, "%s%s", server_target, bulk_docs);
+    printf("%s\n", data);
+    printf("%d", data_len);
+
+    http_post_data(data, data_len, server_bulk_target);
+}
+
+void upload_a_single_doc(pt_node_t* doc, char* server_target)
+{
+    char* data = NULL;
+    int data_len = 0;
+    data = pt_to_json(doc, 0);
+    data_len = strlen(data);
+
+    http_post_data(data, data_len, server_target);
+}
+
+void save_gps_to_local(pt_node_t* gps, FILE* fp)
+{
+    char* data = NULL;
+    int data_len = 0;
+    data = pt_to_json(gps, 0);
+    data_len = strlen(data);
 }
