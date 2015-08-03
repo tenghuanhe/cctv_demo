@@ -40,6 +40,8 @@ int main(void)
     if (bulk)
     {
         data = pt_to_json(bulk, 0);
+
+        printf("%s\n", data);
         if (data)
             data_len = strlen(data);
     }
