@@ -19,7 +19,7 @@ static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* d
 void http_post_data(char* data, int data_len, char* server_target);
 void upload_local_as_bulks(char* file, char* server_target);
 void upload_a_single_doc(pt_node_t* doc, char* server_target);
-void save_gps_to_local(pt_node_t* gps, FILE* fp);
+void save_gps_to_local(pt_node_t* gps, char* file);
 
 double getLon();
 double getLat();
@@ -27,7 +27,7 @@ char* getTime();
 
 int main(int argc, char** argv)
 {
-    char* server_target = "http://localhost:5984/cctv1";
+    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1";
     pt_node_t* gps = pt_gps(getLon(), getLat());
 
     upload_a_single_doc(gps, server_target);
@@ -169,10 +169,11 @@ void upload_a_single_doc(pt_node_t* doc, char* server_target)
     http_post_data(data, data_len, server_target);
 }
 
-void save_gps_to_local(pt_node_t* gps, FILE* fp)
+void save_gps_to_local(pt_node_t* gps, char* file)
 {
     char* data = NULL;
     int data_len = 0;
     data = pt_to_json(gps, 0);
     data_len = strlen(data);
+
 }
