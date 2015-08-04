@@ -17,7 +17,7 @@ pt_node_t* pt_gps(double lon, double lat);
 static void* myrealloc(void* ptr, size_t size);
 static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* data);
 void http_post_data(char* data, int data_len, char* server_target);
-void upload_local_to_bulks(char* file, char* server_target);
+void upload_local_as_bulks(char* file, char* server_target);
 void upload_a_single_doc(pt_node_t* doc, char* server_target);
 void save_gps_to_local(pt_node_t* gps, FILE* fp);
 
@@ -27,11 +27,11 @@ char* getTime();
 
 int main(int argc, char** argv)
 {
-    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1/";
+    char* server_target = "http://localhost:5984/cctv1";
     pt_node_t* gps = pt_gps(getLon(), getLat());
 
     upload_a_single_doc(gps, server_target);
-    upload_local_to_bulks("pp.json", server_target);
+    upload_local_as_bulks("pp.json", server_target);
     return 0; 
 }
 
@@ -68,10 +68,10 @@ double getLat()
 
 char* getTime()
 {
-    char* string = malloc(100);
+    char* string = malloc(sizeof(char) * 100);
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
-    snprintf(string, 100, "%d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    sprintf(string, "%d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     return (char*)string;
 }
 
@@ -87,8 +87,8 @@ void http_post_data(char* data, int data_len, char* server_target)
     header_list = curl_slist_append(header_list, "Content-Type: application/json");
     curl_easy_setopt(curl_handle, CURLOPT_URL, server_target);
     curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, header_list);
-    curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, data_len);
     curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, data);
+    curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, data_len);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, recv_memory_callback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&chunk);
 
@@ -120,7 +120,7 @@ static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* d
     return realsize;
 }
 
-void upload_local_to_bulks(char* file, char* server_target)
+void upload_local_as_bulks(char* file, char* server_target)
 {
     FILE* fp = NULL;
     struct stat st;
@@ -128,27 +128,33 @@ void upload_local_to_bulks(char* file, char* server_target)
     const char* bulk_head = "{\"docs\": [";
     const char* bulk_tail = "]}";
     const char* bulk_docs = "/_bulk_docs";
-    char server_bulk_target[100];
+    char* server_bulk_target;
     char* file_data;
     char* data;
     int data_len;
-    fp = fopen(file, "r");
+    int file_data_len;
+    int server_len;
 
+    fp = fopen(file, "r");
     if(fp == NULL)
         return;
     
     fstat(fileno(fp), &st);
 
     // Here subtraction by 2 to remove the tailling comma in file
-    file_data = malloc(sizeof(char) * st.st_size - 2);
-    fread(file_data, sizeof(char), st.st_size - 2, fp);
-
-    data_len = st.st_size - 2 + strlen(bulk_head) + strlen(bulk_tail) + 1;
+    file_data = malloc(sizeof(char) * st.st_size);
+    file_data_len = st.st_size - 2;
+    fread(file_data, sizeof(char), st.st_size, fp);
+    data_len = file_data_len + strlen(bulk_head) + strlen(bulk_tail);
     data = malloc(data_len);
-    snprintf(data, data_len, "%s%s%s", bulk_head, file_data, bulk_tail);
-    snprintf(server_bulk_target, 100, "%s%s", server_target, bulk_docs);
-    printf("%s\n", data);
-    printf("%d", data_len);
+    memcpy(data, bulk_head, strlen(bulk_head));
+    memcpy(data + strlen(bulk_head), file_data, file_data_len);
+    memcpy(data + strlen(bulk_head) + file_data_len, bulk_tail, strlen(bulk_tail));
+
+    server_len = strlen(server_target) + strlen(bulk_docs);
+    server_bulk_target = malloc(sizeof(char) * server_len);
+    memcpy(server_bulk_target, server_target, strlen(server_target));
+    memcpy(server_bulk_target + strlen(server_target), bulk_docs, strlen(bulk_docs));
 
     http_post_data(data, data_len, server_bulk_target);
 }
