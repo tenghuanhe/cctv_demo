@@ -7,7 +7,7 @@
 
 int main(void)
 {
-    const char* server_target = "http://192.168.1.149:5984/cctv";
+    const char* server_target = "http://tenghuanhe:hetenghuan@cloudant.com/cctv10";
     int i;
     char* data = NULL;
     long data_len = 0;
@@ -17,7 +17,7 @@ int main(void)
 
     if (bulk)
     {
-        data = pt_to_json(bulk, 0);
+        data = pt_to_json(bulk, 2);
 
         if (data)
             data_len = strlen(data);
@@ -37,7 +37,7 @@ int main(void)
     curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
 
     res = curl_easy_perform(curl_handle);
-    printf("%d", res);
+    printf("%d\n", res);
     curl_easy_cleanup(curl_handle);
     
     return 0;
