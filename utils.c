@@ -27,7 +27,7 @@ char* getTime();
 
 int main(int argc, char** argv)
 {
-    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1";
+    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv5";
     pt_node_t* gps = pt_gps(getLon(), getLat());
 
     upload_a_single_doc(gps, server_target);

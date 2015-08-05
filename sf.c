@@ -28,14 +28,14 @@ char* getTime();
 int main(int argc, char** argv)
 {
     char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1";
-    pt_node_t* gps = pt_gps(getLon(), getLat());
+    pt_node_t* gps_doc = get_gps_doc(getLon(), getLat());
 
-    upload_a_single_doc(gps, server_target);
+    upload_a_single_doc(gps_doc, server_target);
     upload_local_as_bulks("pp.json", server_target);
     return 0; 
 }
 
-pt_node_t* pt_gps(double lon, double lat)
+pt_node_t* get_gps_doc(double lon, double lat)
 {
     pt_node_t* doc = pt_map_new();
 
@@ -54,6 +54,15 @@ pt_node_t* pt_gps(double lon, double lat)
     pt_map_set(doc, "properties", properties);
 
     return (pt_node_t*)doc;
+}
+
+pt_node_t* get_log_doc()
+{
+}
+
+pt_node_t* get_keyframe_doc()
+{
+
 }
 
 double getLon()
