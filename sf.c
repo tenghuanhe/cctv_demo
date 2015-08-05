@@ -34,7 +34,7 @@ char* getTime();
 
 int main(int argc, char** argv)
 {
-    char* server_target = "http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv1";
+    char* server_target = "http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv11";
     pt_node_t* gps_doc = get_gps_doc();
 	pt_node_t* log_doc = get_log_doc();
 
@@ -232,7 +232,7 @@ void save_gps_to_local(pt_node_t* gps, char* file)
     data_len = strlen(data);
 }
 
-void upload_keyframe_doc_with_attachment(pt_node_t* doc, char* filename)
+void upload_keyframe_doc_as_attachment(pt_node_t* doc, char* filename)
 {
 	
 }
