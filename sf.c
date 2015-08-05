@@ -13,7 +13,7 @@ struct memory_chunk
     size_t size;
 };
 
-pt_node_t* pt_gps(double lon, double lat);
+pt_node_t* get_gps_doc(double lon, double lat);
 static void* myrealloc(void* ptr, size_t size);
 static size_t recv_memory_callback(void* ptr, size_t size, size_t nmemb, void* data);
 void http_post_data(char* data, int data_len, char* server_target);
