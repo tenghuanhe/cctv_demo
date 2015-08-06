@@ -221,6 +221,10 @@ void upload_local_as_bulks(char* file, char* server_target)
     memcpy(server_bulk_target + strlen(server_target), bulk_docs, strlen(bulk_docs));
 
     http_post_data(data, data_len, server_bulk_target);
+	
+	free(file_data);
+	free(data);
+	free(server_bulk_target);
 }
 
 char* upload_a_single_doc(pt_node_t* doc, char* server_target)
@@ -272,6 +276,7 @@ void upload_doc_with_keyframe_as_attachment(pt_node_t* keyframe_doc, char* filen
     printf("%s\n", update_url);
 
     http_put_file(filename, update_url);
+	free(update_url);
 }
 
 void http_put_file(char* file, char* server_target)
