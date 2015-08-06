@@ -259,7 +259,7 @@ void upload_doc_with_keyframe_as_attachment(pt_node_t* keyframe_doc, char* filen
 
     printf("%s\n", id);
     printf("%s\n", rev);
-    url_len = strlen(server_target) + strlen(id) + strlen(rev) + 7;
+    url_len = strlen(server_target) + strlen(id) + strlen(rev) + strlen(filename) + 7;
     update_url = malloc(sizeof(char) * (url_len + 32));
     memcpy(update_url, server_target, strlen(server_target));
     memcpy(update_url + strlen(server_target), "/", 1);
@@ -286,8 +286,6 @@ void http_put_file(char* file, char* server_target)
     fp = fopen(file, "rb");
     curl_handle = curl_easy_init();
     header_list = curl_slist_append(header_list, "Content-Type: image/jpeg");
-
-    printf("____________________________\n");
 
     if (curl_handle)
     {
