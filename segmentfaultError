@@ -9,4 +9,8 @@ https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com
 得到response body是空的
 curlCode是52,如果要输出结果的话则会出现segmentfalut
 要解决这个问题则需要自己在程序里面实现自动跳转功能
+在用curl访问http://tenghuanhe.cloudant.com和https://tenghuanhe.cloudant.com的时候结果是一样的
+可以知道这个时候是实现了跳转的
+但是添加了用户名和密码以后就不行了
+更加确切的问题所在应该是curl不支持添加了用户名和密码的http请求
 
