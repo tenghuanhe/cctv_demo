@@ -7,13 +7,13 @@
 
 int main(void)
 {
-    const char* server_target = "http://tenghuanhe:hetenghuan@cloudant.com/cctv10";
+    const char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv10";
     int i;
     char* data = NULL;
     long data_len = 0;
 
     pt_node_t* bulk = pt_map_new();
-    pt_map_set(bulk, "name", pt_string_new("huachuang"));
+    pt_map_set(bulk, "name", pt_string_new("IBM"));
 
     if (bulk)
     {
@@ -22,8 +22,6 @@ int main(void)
         if (data)
             data_len = strlen(data);
     }
-
-    printf("%s\n", data);
 
     CURL *curl_handle = curl_easy_init();
     CURLcode res;

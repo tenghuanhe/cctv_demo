@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I. -lcurl -lpillowtalk -pthread
+CFLAGS = -g -I. -lcurl -lpillowtalk -pthread
 
 SRC = $(wildcard *.c)
 

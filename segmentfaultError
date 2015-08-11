@@ -1,0 +1,12 @@
+出现segmentfault error
+或者curl: (52) Empty reply from server
+原因是在使用
+http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com的时候
+服务器会重定向到
+https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com
+使用浏览器访问的会自动跳转得到正确的结果
+但是使用curl的时候则不会自动跳转
+得到response body是空的
+curlCode是52,如果要输出结果的话则会出现segmentfalut
+要解决这个问题则需要自己在程序里面实现自动跳转功能
+

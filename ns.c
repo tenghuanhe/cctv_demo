@@ -36,18 +36,12 @@ char* getTime();
 
 int main(int argc, char** argv)
 {
-    char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv12";
+    char* server_target = "http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv12";
     pt_node_t* log_doc = get_log_doc();
     pt_node_t* keyframe_doc = get_keyframe_doc();
 
     upload_a_single_doc(log_doc, server_target);
-    upload_doc_with_keyframe_as_attachment(keyframe_doc, "keyframe.jpg", server_target);
 
-    pt_node_t* gps_doc = get_gps_doc();
-    save_gps_to_local(gps_doc, "pp.json");
-    upload_local_as_bulks("pp.json", server_target);
-    FILE* fp = fopen("pp.json", "w");
-    fclose(fp);
     return 0; 
 }
 
@@ -138,6 +132,7 @@ char* getTime()
 
 char* http_post_data(char* data, int data_len, char* server_target)
 {
+    printf("%s\n", data);
     struct curl_slist* header_list = NULL;
     struct memory_chunk chunk;
     char* response;
@@ -155,6 +150,10 @@ char* http_post_data(char* data, int data_len, char* server_target)
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&chunk);
 
     res = curl_easy_perform(curl_handle);
+    printf("response code %d\n", res);
+    printf("chunk size %d\n", chunk.size);
+    printf("strlen of chunk memory %d\n", strlen(chunk.memory));
+
     printf("%s\n", chunk.memory);
     response = malloc(sizeof(char) * (chunk.size + 1));
     memcpy(response, chunk.memory, chunk.size);
@@ -241,8 +240,6 @@ char* upload_a_single_doc(pt_node_t* doc, char* server_target)
     int data_len = 0;
     data = pt_to_json(doc, 2);
     data_len = strlen(data);
-
-    printf("%s\n", data);
 
     response = http_post_data(data, data_len, server_target);
 }
