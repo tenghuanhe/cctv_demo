@@ -7,7 +7,7 @@
 
 int main(void)
 {
-    const char* server_target = "http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv10";
+    const char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv10";
     int i;
     char* data = NULL;
     long data_len = 0;

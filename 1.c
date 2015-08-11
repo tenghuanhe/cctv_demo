@@ -7,7 +7,7 @@
 
 int main(void)
 {
-    const char* server_target = "https://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv10";
+    const char* server_target = "http://tenghuanhe:hetenghuan@tenghuanhe.cloudant.com/cctv10";
     int i;
     char* data = NULL;
     long data_len = 0;
@@ -32,7 +32,7 @@ int main(void)
     curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, header_list);
     curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, data_len);
     curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
+//    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
 
     res = curl_easy_perform(curl_handle);
     printf("%d\n", res);
